@@ -434,3 +434,4 @@ ALTER TABLE auditoria
 DROP FOREIGN KEY auditoria_ibfk_1
 
 DELIMITER ;
+
