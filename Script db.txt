@@ -1,0 +1,436 @@
+-- =========================
+-- ROLES
+-- =========================
+CREATE TABLE roles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50)
+) ENGINE=InnoDB;
+
+-- =========================
+-- USUARIOS
+-- =========================
+CREATE TABLE usuarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100),
+    email VARCHAR(100) UNIQUE,
+    password TEXT,
+    rol_id INT,
+    FOREIGN KEY (rol_id) REFERENCES roles(id)
+) ENGINE=InnoDB;
+
+-- =========================
+-- ESTUDIANTES
+-- =========================
+CREATE TABLE estudiantes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT UNIQUE,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+) ENGINE=InnoDB;
+
+-- =========================
+-- DOCENTES
+-- =========================
+CREATE TABLE docentes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT UNIQUE,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+) ENGINE=InnoDB;
+
+-- =========================
+-- CURSOS
+-- =========================
+CREATE TABLE cursos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100),
+    periodo INT
+) ENGINE=InnoDB;
+
+-- =========================
+-- MATERIAS
+-- =========================
+CREATE TABLE materias (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100),
+    curso_id INT,
+    docente_id INT,
+    FOREIGN KEY (curso_id) REFERENCES cursos(id),
+    FOREIGN KEY (docente_id) REFERENCES docentes(id)
+) ENGINE=InnoDB;
+
+-- =========================
+-- CONTENIDO
+-- =========================
+CREATE TABLE contenido (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    titulo VARCHAR(100),
+    descripcion TEXT,
+    materia_id INT,
+    FOREIGN KEY (materia_id) REFERENCES materias(id)
+) ENGINE=InnoDB;
+
+-- =========================
+-- TAREAS
+-- =========================
+CREATE TABLE tareas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    titulo VARCHAR(100),
+    descripcion TEXT,
+    fecha_entrega DATE,
+    materia_id INT,
+    FOREIGN KEY (materia_id) REFERENCES materias(id)
+) ENGINE=InnoDB;
+
+-- =========================
+-- RECURSOS (SOLO PARA TAREAS)
+-- =========================
+CREATE TABLE recursos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tipo VARCHAR(20), -- imagen, video, archivo
+    url TEXT,
+    tarea_id INT,
+    FOREIGN KEY (tarea_id) REFERENCES tareas(id)
+) ENGINE=InnoDB;
+
+-- =========================
+-- ENTREGAS DE TAREAS
+-- =========================
+CREATE TABLE entregas_tareas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    estudiante_id INT,
+    tarea_id INT,
+    archivo_url TEXT,
+    fecha_entrega TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    calificacion DECIMAL(5,2),
+    FOREIGN KEY (estudiante_id) REFERENCES estudiantes(id),
+    FOREIGN KEY (tarea_id) REFERENCES tareas(id)
+) ENGINE=InnoDB;
+
+-- =========================
+-- EVALUACIONES
+-- =========================
+CREATE TABLE evaluaciones (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    titulo VARCHAR(100),
+    descripcion TEXT,
+    materia_id INT,
+    FOREIGN KEY (materia_id) REFERENCES materias(id)
+) ENGINE=InnoDB;
+
+-- =========================
+-- PREGUNTAS
+-- =========================
+CREATE TABLE preguntas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    texto TEXT,
+    evaluacion_id INT,
+    FOREIGN KEY (evaluacion_id) REFERENCES evaluaciones(id)
+) ENGINE=InnoDB;
+
+-- =========================
+-- RESPUESTAS
+-- =========================
+CREATE TABLE respuestas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    texto TEXT,
+    es_correcta BOOLEAN,
+    pregunta_id INT,
+    FOREIGN KEY (pregunta_id) REFERENCES preguntas(id)
+) ENGINE=InnoDB;
+
+-- =========================
+-- RESPUESTAS ESTUDIANTE
+-- =========================
+CREATE TABLE respuestas_estudiante (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    estudiante_id INT,
+    pregunta_id INT,
+    respuesta_id INT,
+    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (estudiante_id) REFERENCES estudiantes(id),
+    FOREIGN KEY (pregunta_id) REFERENCES preguntas(id),
+    FOREIGN KEY (respuesta_id) REFERENCES respuestas(id)
+) ENGINE=InnoDB;
+
+-- =========================
+-- ASISTENCIA
+-- =========================
+CREATE TABLE asistencia (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    estudiante_id INT,
+    materia_id INT,
+    fecha DATE,
+    presente BOOLEAN,
+    FOREIGN KEY (estudiante_id) REFERENCES estudiantes(id),
+    FOREIGN KEY (materia_id) REFERENCES materias(id)
+) ENGINE=InnoDB;
+
+-- =========================
+-- AUDITORIA (PRO 🔥)
+-- =========================
+CREATE TABLE auditoria (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tabla_afectada VARCHAR(50),
+    accion VARCHAR(20), -- INSERT, UPDATE, DELETE
+    registro_id INT,
+    usuario_id INT,
+    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    descripcion TEXT,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+) ENGINE=InnoDB;
+
+
+
+-- =========================
+-- ROLES (solo 2)
+-- =========================
+INSERT INTO roles (id, nombre) VALUES
+(1, 'docente'),
+(2, 'estudiante');
+
+-- =========================
+-- USUARIOS (2)
+-- =========================
+INSERT INTO usuarios (id, nombre, email, password, rol_id) VALUES
+(1, 'Carlos Docente', 'docente@mail.com', '1234', 1),
+(2, 'Juan Estudiante', 'estudiante@mail.com', '1234', 2);
+
+-- =========================
+-- DOCENTES (1)
+-- =========================
+INSERT INTO docentes (id, usuario_id) VALUES
+(1, 1);
+
+-- =========================
+-- ESTUDIANTES (1)
+-- =========================
+INSERT INTO estudiantes (id, usuario_id) VALUES
+(1, 2);
+
+-- =========================
+-- CURSOS (7)
+-- =========================
+INSERT INTO cursos (id, nombre, periodo) VALUES
+(1, '6A', 1),
+(2, '6B', 1),
+(3, '7A', 2),
+(4, '7B', 2),
+(5, '8A', 3),
+(6, '9A', 4),
+(7, '10A', 1);
+
+-- =========================
+-- MATERIAS (7)
+-- =========================
+INSERT INTO materias (id, nombre, curso_id, docente_id) VALUES
+(1, 'Matemáticas', 1, 1),
+(2, 'Español', 2, 1),
+(3, 'Inglés', 3, 1),
+(4, 'Ciencias', 4, 1),
+(5, 'Historia', 5, 1),
+(6, 'Física', 6, 1),
+(7, 'Química', 7, 1);
+
+-- =========================
+-- CONTENIDO (7)
+-- =========================
+INSERT INTO contenido (id, titulo, descripcion, materia_id) VALUES
+(1, 'Tema 1', 'Introducción', 1),
+(2, 'Tema 2', 'Gramática', 2),
+(3, 'Tema 3', 'Verbos', 3),
+(4, 'Tema 4', 'Ecosistemas', 4),
+(5, 'Tema 5', 'Edad Media', 5),
+(6, 'Tema 6', 'Movimiento', 6),
+(7, 'Tema 7', 'Átomos', 7);
+
+-- =========================
+-- TAREAS (7)
+-- =========================
+INSERT INTO tareas (id, titulo, descripcion, fecha_entrega, materia_id) VALUES
+(1, 'Tarea 1', 'Ejercicios básicos', '2026-03-20', 1),
+(2, 'Tarea 2', 'Ensayo', '2026-03-21', 2),
+(3, 'Tarea 3', 'Traducción', '2026-03-22', 3),
+(4, 'Tarea 4', 'Resumen', '2026-03-23', 4),
+(5, 'Tarea 5', 'Investigación', '2026-03-24', 5),
+(6, 'Tarea 6', 'Problemas', '2026-03-25', 6),
+(7, 'Tarea 7', 'Laboratorio', '2026-03-26', 7);
+
+-- =========================
+-- RECURSOS (7)
+-- =========================
+INSERT INTO recursos (id, tipo, url, tarea_id) VALUES
+(1, 'archivo', 'archivo1.pdf', 1),
+(2, 'imagen', 'imagen1.jpg', 2),
+(3, 'video', 'video1.mp4', 3),
+(4, 'archivo', 'archivo2.pdf', 4),
+(5, 'imagen', 'imagen2.jpg', 5),
+(6, 'video', 'video2.mp4', 6),
+(7, 'archivo', 'archivo3.pdf', 7);
+
+-- =========================
+-- ENTREGAS TAREAS (7)
+-- =========================
+INSERT INTO entregas_tareas (id, estudiante_id, tarea_id, archivo_url, fecha_entrega, calificacion) VALUES
+(1, 1, 1, 'entrega1.pdf', NOW(), 4.5),
+(2, 1, 2, 'entrega2.pdf', NOW(), 4.0),
+(3, 1, 3, 'entrega3.pdf', NOW(), 3.8),
+(4, 1, 4, 'entrega4.pdf', NOW(), 4.2),
+(5, 1, 5, 'entrega5.pdf', NOW(), 5.0),
+(6, 1, 6, 'entrega6.pdf', NOW(), 3.5),
+(7, 1, 7, 'entrega7.pdf', NOW(), 4.7);
+
+-- =========================
+-- EVALUACIONES (7)
+-- =========================
+INSERT INTO evaluaciones (id, titulo, descripcion, materia_id) VALUES
+(1, 'Eval 1', 'Básico', 1),
+(2, 'Eval 2', 'Texto', 2),
+(3, 'Eval 3', 'Inglés', 3),
+(4, 'Eval 4', 'Ciencia', 4),
+(5, 'Eval 5', 'Historia', 5),
+(6, 'Eval 6', 'Física', 6),
+(7, 'Eval 7', 'Química', 7);
+
+-- =========================
+-- PREGUNTAS (7)
+-- =========================
+INSERT INTO preguntas (id, texto, evaluacion_id) VALUES
+(1, '2+2=?', 1),
+(2, 'Sujeto?', 2),
+(3, 'Hello en español?', 3),
+(4, 'Planta?', 4),
+(5, 'Año independencia?', 5),
+(6, 'Velocidad?', 6),
+(7, 'Elemento?', 7);
+
+-- =========================
+-- RESPUESTAS (7)
+-- =========================
+INSERT INTO respuestas (id, texto, es_correcta, pregunta_id) VALUES
+(1, '4', TRUE, 1),
+(2, 'Nombre', TRUE, 2),
+(3, 'Hola', TRUE, 3),
+(4, 'Ser vivo', TRUE, 4),
+(5, '1810', TRUE, 5),
+(6, 'm/s', TRUE, 6),
+(7, 'Hidrógeno', TRUE, 7);
+
+-- =========================
+-- RESPUESTAS ESTUDIANTE (7)
+-- =========================
+INSERT INTO respuestas_estudiante (id, estudiante_id, pregunta_id, respuesta_id, fecha) VALUES
+(1, 1, 1, 1, NOW()),
+(2, 1, 2, 2, NOW()),
+(3, 1, 3, 3, NOW()),
+(4, 1, 4, 4, NOW()),
+(5, 1, 5, 5, NOW()),
+(6, 1, 6, 6, NOW()),
+(7, 1, 7, 7, NOW());
+
+-- =========================
+-- ASISTENCIA (7)
+-- =========================
+INSERT INTO asistencia (id, estudiante_id, materia_id, fecha, presente) VALUES
+(1, 1, 1, '2026-03-10', TRUE),
+(2, 1, 2, '2026-03-11', TRUE),
+(3, 1, 3, '2026-03-12', FALSE),
+(4, 1, 4, '2026-03-13', TRUE),
+(5, 1, 5, '2026-03-14', TRUE),
+(6, 1, 6, '2026-03-15', FALSE),
+(7, 1, 7, '2026-03-16', TRUE);
+
+-- =========================
+-- AUDITORIA (7)
+-- =========================
+INSERT INTO auditoria (id, tabla_afectada, accion, registro_id, usuario_id, descripcion) VALUES
+(1, 'tareas', 'INSERT', 1, 1, 'Creación tarea'),
+(2, 'tareas', 'UPDATE', 2, 1, 'Actualización tarea'),
+(3, 'usuarios', 'INSERT', 2, 1, 'Nuevo usuario'),
+(4, 'materias', 'INSERT', 3, 1, 'Nueva materia'),
+(5, 'evaluaciones', 'INSERT', 4, 1, 'Nueva evaluación'),
+(6, 'respuestas', 'INSERT', 5, 1, 'Nueva respuesta'),
+(7, 'asistencia', 'INSERT', 6, 1, 'Registro asistencia');
+
+
+
+-- Índice para búsquedas por estudiante en entregas
+CREATE INDEX idx_entregas_estudiante 
+ON entregas_tareas(estudiante_id);
+
+-- Índice para búsquedas por materia en tareas
+CREATE INDEX idx_tareas_materia 
+ON tareas(materia_id);
+
+
+
+DELIMITER $$
+
+CREATE TRIGGER trg_tareas_insert
+AFTER INSERT ON tareas
+FOR EACH ROW
+BEGIN
+    INSERT INTO auditoria(tabla_afectada, accion, registro_id, usuario_id, descripcion)
+    VALUES ('tareas', 'INSERT', NEW.id, 1, CONCAT('Se creó la tarea: ', NEW.titulo));
+END$$
+
+
+DELIMITER $$
+
+CREATE TRIGGER trg_tareas_update
+AFTER UPDATE ON tareas
+FOR EACH ROW
+BEGIN
+    INSERT INTO auditoria(tabla_afectada, accion, registro_id, usuario_id, descripcion)
+    VALUES ('tareas', 'UPDATE', NEW.id, 1, CONCAT('Se actualizó la tarea: ', NEW.titulo));
+END$$
+
+DELIMITER ;
+
+
+
+DELIMITER $$
+
+CREATE TRIGGER trg_tareas_delete
+AFTER DELETE ON tareas
+FOR EACH ROW
+BEGIN
+    INSERT INTO auditoria(tabla_afectada, accion, registro_id, usuario_id, descripcion)
+    VALUES ('tareas', 'DELETE', OLD.id, 1, CONCAT('Se eliminó la tarea: ', OLD.titulo));
+END$$
+
+DELIMITER ;
+
+
+
+CREATE VIEW vw_tareas_completas AS
+SELECT 
+    t.id AS tarea_id,
+    t.titulo,
+    t.descripcion,
+    t.fecha_entrega,
+    m.nombre AS materia,
+    c.nombre AS curso,
+    u.nombre AS docente
+FROM tareas t
+JOIN materias m ON t.materia_id = m.id
+JOIN cursos c ON m.curso_id = c.id
+JOIN docentes d ON m.docente_id = d.id
+JOIN usuarios u ON d.usuario_id = u.id;
+
+
+
+CREATE VIEW vw_entregas_estudiantes AS
+SELECT 
+    e.id,
+    u.nombre AS estudiante,
+    t.titulo AS tarea,
+    e.calificacion,
+    e.fecha_entrega
+FROM entregas_tareas e
+JOIN estudiantes es ON e.estudiante_id = es.id
+JOIN usuarios u ON es.usuario_id = u.id
+JOIN tareas t ON e.tarea_id = t.id;
+
+ALTER TABLE auditoria
+DROP FOREIGN KEY auditoria_ibfk_1
+
+DELIMITER ;
