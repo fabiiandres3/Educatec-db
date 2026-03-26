@@ -435,3 +435,69 @@ DROP FOREIGN KEY auditoria_ibfk_1
 
 DELIMITER ;
 
+
+DELIMITER $$
+
+CREATE PROCEDURE insertar_usuario(
+    IN p_nombre VARCHAR(100),
+    IN p_email VARCHAR(100),
+    IN p_password TEXT,
+    IN p_rol_id INT
+)
+BEGIN
+    INSERT INTO usuarios (nombre, email, password, rol_id)
+    VALUES (p_nombre, p_email, p_password, p_rol_id);
+END$$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+CREATE PROCEDURE eliminar_usuario(
+    IN p_id INT
+)
+BEGIN
+    DELETE FROM usuarios
+    WHERE id = p_id;
+END$$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+CREATE PROCEDURE actualizar_usuario(
+    IN p_id INT,
+    IN p_nombre VARCHAR(100),
+    IN p_email VARCHAR(100),
+    IN p_password TEXT,
+    IN p_rol_id INT
+)
+BEGIN
+    UPDATE usuarios
+    SET 
+        nombre = p_nombre,
+        email = p_email,
+        password = p_password,
+        rol_id = p_rol_id
+    WHERE id = p_id;
+END$$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+CREATE PROCEDURE obtener_usuarios_con_roles()
+BEGIN
+    SELECT 
+        u.id,
+        u.nombre,
+        u.email,
+        r.nombre AS rol
+    FROM usuarios u
+    INNER JOIN roles r ON u.rol_id = r.id;
+END$$
+
+DELIMITER ;
